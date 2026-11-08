@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>My Committee Manager</title>
+<style>
+:root{--green:#16794b;--green-dark:#105d39;--blue:#2856a6;--ink:#17243a;--muted:#64748b;--line:#e5eaf1;--surface:#fff;--bg:#f4f7fb;--soft:#edf7f1;--red:#b42318;--shadow:0 8px 28px rgba(22,34,51,.06)}
+*{box-sizing:border-box}body{margin:0;padding:24px;background:linear-gradient(180deg,#eef5f1 0,#f5f7fb 260px,var(--bg) 100%);color:var(--ink);font-family:Inter,Segoe UI,Arial,sans-serif;line-height:1.45}main{max-width:1180px;margin:auto}h1{color:var(--green-dark);font-size:clamp(25px,4vw,34px);letter-spacing:-.7px;margin:4px 0}.admin{font-size:13px;color:#536477}.admin b{color:var(--green-dark)}h2{font-size:19px;letter-spacing:-.2px;margin:0 0 14px}.muted{font-size:12px;color:var(--muted)}.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:20px 0}.stat{background:var(--surface);padding:17px;border:1px solid var(--line);border-radius:15px;min-width:0;box-shadow:var(--shadow)}.stat small{color:var(--muted);font-size:12px}.stat b{display:block;font-size:clamp(17px,2vw,22px);margin-top:7px;overflow-wrap:anywhere;color:var(--green-dark)}.card{background:var(--surface);padding:20px;border:1px solid var(--line);border-radius:16px;margin:15px 0;box-shadow:var(--shadow)}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}.grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}.field label,.field>small{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}input,select,button{font:inherit;padding:10px 12px;border:1px solid #ccd6e2;border-radius:9px;max-width:100%}input,select{width:100%;background:#fff;color:var(--ink)}input:focus,select:focus{outline:2px solid #b7ddc8;border-color:var(--green)}button{cursor:pointer;font-weight:650;background:#edf1f5;color:#27364b;transition:transform .12s,filter .12s}button:hover{filter:brightness(.97);transform:translateY(-1px)}button:disabled{opacity:.4;cursor:not-allowed}.green{background:var(--green);color:white;border:0}.green:hover{background:var(--green-dark)}.blue{background:var(--blue);color:white;border:0}.red{background:#fff0ef;color:var(--red);border:1px solid #ffd2cd}.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:14px}.row>*{flex:1}.note{background:#eff6ff;padding:13px 15px;border:1px solid #dbeafe;border-radius:11px;color:#1e40af;font-size:13px}.member{display:grid;grid-template-columns:minmax(160px,1.4fr) minmax(120px,1fr) minmax(110px,1fr) auto auto;gap:10px;align-items:center;padding:14px 0;border-bottom:1px solid var(--line)}.tag{font-size:11px;font-weight:650;padding:5px 9px;border-radius:20px;background:#e4f5eb;color:#17633d;white-space:nowrap}.warn{background:#fff0df;color:#9a4b08}table{border-collapse:collapse;width:100%;font-size:13px;min-width:700px}td,th{padding:11px 9px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{background:#f5f8fb;color:#42526a;font-size:12px;white-space:nowrap}.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px}.tablewrap table{min-width:700px}.admin{font-size:13px;color:#475569}.danger-note{background:#fff7ed;color:#9a3412;padding:13px;border:1px solid #fed7aa;border-radius:10px;font-size:13px}.hidden{display:none!important}.section-hint{margin-top:-7px;margin-bottom:12px}button:focus-visible{outline:3px solid #a7d7bb;outline-offset:2px}.member button{white-space:nowrap}.member .membername input{font-weight:600}.danger-note{line-height:1.55}
+@media(max-width:760px){body{padding:12px}.stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.member{grid-template-columns:1fr 1fr}.member .membername{grid-column:1/-1}.card{padding:15px}.stat{padding:13px}}
+@media(max-width:460px){.grid,.grid.two{grid-template-columns:1fr}.row{flex-direction:column;align-items:stretch}.member{grid-template-columns:1fr 1fr}.member button{width:100%}}
+</style>
+</head>
+<body><main>
+<h1>My Committee Manager</h1><div class="admin">Administrator: <b id="adminLabel">Aamir Shahzad</b></div>
+<p class="muted">Flexible committee records · PKR · Auto-save enabled</p>
+<div class="stats">
+ <div class="stat"><small>Members in Selected Month</small><b id="memberCount">10</b></div>
+ <div class="stat"><small>Committee Months</small><b id="monthCount">10</b></div>
+ <div class="stat"><small>Monthly Target</small><b id="target">Rs. 30,000</b></div>
+ <div class="stat"><small>Selected Month Received</small><b id="received">Rs. 0</b></div>
+</div>
+<div class="card"><h2>Committee Settings</h2>
+ <div class="grid">
+  <div class="field"><label>Committee name</label><input id="committeeName" maxlength="80"></div>
+  <div class="field"><label>Monthly contribution per member (Rs.)</label><input id="contribution" type="number" min="1" step="1"></div>
+  <div class="field"><label>Total months</label><input id="duration" type="number" min="1" max="600" step="1"></div>
+  <div class="field"><label>Start date</label><input id="startDate" type="date"></div>
+  <div class="field"><label>Administrator</label><input id="adminName" value="Aamir Shahzad" maxlength="80"></div>
+  <div class="field"><label>Selected month</label><select id="month"></select></div>
+ </div>
+ <div class="row"><button class="green" onclick="saveSettings()">Save Settings</button><button class="blue" onclick="addMonth()">+ Add One Month</button></div>
+ <p class="muted">Settings ko save karne se monthly target automatically update hoga. Months ya contribution change karne se purani entries delete nahi hotin.</p>
+</div>
+<div class="card"><h2>Members Management</h2><div class="grid two">
+ <div class="field"><label>New member name</label><input id="newMember" placeholder="Member ka naam"></div>
+ <div class="field"><label>Joining month</label><select id="joinMonth"></select></div>
+ </div><div class="row"><button class="green" onclick="addMember()">+ Add Member</button></div>
+ <div id="memberList"></div>
+ <p class="muted">Late joining par member ko pichlay tamam months ke Rs. 3,000 per month arrears dene honge. Joining month ki Rs. 3,000 contribution bhi due hogi. Monthly committee target hamesha active members × per-member contribution hoga.</p><p class="muted">Inactive karne se member ka purana record محفوظ rehta hai. Delete permanently karne se member aur uski tamam payment/recovery entries remove ho jayengi; is se purani history aur totals bhi recalculate honge. Pehle backup lein.</p>
+</div>
+<div class="card"><h2>Monthly Payments</h2><div class="note">Har member ki total payment is month enter karein. Is payment se uska purana baqaya aur current month dono adjust honge. Monthly target = active members × per-member contribution.</div>
+ <p id="monthInfo" class="muted"></p><div id="payments"></div>
+ <div class="row"><button class="green" onclick="savePayments()">Save Payments</button><button class="blue" onclick="nextMonth()">Open Next Month</button></div><p id="payMessage" class="muted"></p>
+</div>
+<div class="card"><h2>Member Wise Account</h2><div class="tablewrap"><table><thead><tr><th>Member</th><th>Previous Balance</th><th>This Month Due</th><th>This Month Paid</th><th>Total Paid To Date</th><th>Remaining Balance</th></tr></thead><tbody id="balances"></tbody></table></div></div>
+<div class="card"><h2>Committee Payout</h2><div class="grid"><div class="field"><label>Committee recipient</label><select id="recipient"></select></div><div class="field"><label>Payout date (optional)</label><input type="date" id="payoutDate"></div><div class="field"><label>Actual payout amount (Rs.)</label><input type="number" id="payoutAmount" min="0" step="1"></div></div><p><label><input type="checkbox" id="payoutGiven" style="width:auto"> Committee ki monthly amount recipient ko de di gayi hai</label></p><button class="green" onclick="savePayout()">Save Payout</button><p id="payoutMsg" class="muted"></p></div>
+<div class="card"><h2>Committee History</h2><div class="tablewrap"><table><thead><tr><th>Month</th><th>Active Members</th><th>Monthly Target</th><th>Total Received</th><th>Pending Target</th><th>Committee Given To</th><th>Payout Status</th><th>Payout Amount</th></tr></thead><tbody id="history"></tbody></table></div></div>
+<div class="card"><h2>Excel / Google Sheets Export</h2><p class="muted">CSV file Excel mein open hoti hai aur Google Sheets mein import ki ja sakti hai. CSV mein exactly 5 columns honge: Member Name, Month, Pending Payment, Total IN aur Total OUT.</p><button class="green" onclick="exportCSV()">Download Excel / Google Sheets CSV</button><p id="exportMsg" class="muted"></p>
+ <div class="danger-note"><b>Important:</b> Export file download karne ke baad usay open karke check karein. Purana record sirf aapke alag confirmation ke baad website se clear hoga. Browser download ko website khud verify nahi kar sakti.</div>
+ <p><label><input type="checkbox" id="exportConfirmed" style="width:auto"> Maine exported file save karke check kar li hai.</label></p>
+ <button class="red" onclick="clearAfterExport()">Export ke baad purana record clear karein / New Committee start</button>
+</div>
+<div class="card"><h2>Backup & Restore</h2><p class="muted">Full backup JSON format mein save hota hai. Excel/CSV export aur JSON backup alag cheezein hain; dono rakhna behtar hai.</p><div class="row"><button class="green" onclick="backup()">Download Full Backup</button><button onclick="document.getElementById('restoreFile').click()">Restore Backup</button><input type="file" id="restoreFile" accept=".json" hidden onchange="restore(event)"></div><p id="status" class="muted">Auto-save ON. Data isi browser aur website address par save hota hai. Regular backups rakhein.</p></div>
+</main>
+
+<script>
+const KEY='myCommittee_flexible_v1', OLDKEY='myCommittee_v4';
+const $=id=>document.getElementById(id);
+const money=n=>'Rs. '+Number(n||0).toLocaleString('en-PK');
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function addMonths(dateStr,n){
+ let dt=new Date((dateStr||'2026-03-10')+'T12:00:00'),day=dt.getDate();
+ dt.setDate(1);dt.setMonth(dt.getMonth()+n);
+ let last=new Date(dt.getFullYear(),dt.getMonth()+1,0).getDate();
+ dt.setDate(Math.min(day,last));return dt.toISOString().slice(0,10);
+}
+function makeMonth(i,start,contribution=3000){
+ return {label:'Month '+(i+1),date:addMonths(start,i),contribution:Number(contribution)||3000,
+ payments:{},recipientId:'',payoutGiven:false,payoutDate:'',payoutAmount:null};
+}
+function fresh(){
+ let start='2026-03-10';
+ let names=['Aamir','Ahsan','Shoukat','Javaid','Gulzar','Naveed','Ijaz','Sanwal','Adnan','Haseeb'];
+ return {adminName:'Aamir Shahzad',committeeName:'My Committee',contribution:3000,startDate:start,
+  members:names.map((name,i)=>({id:'mem'+(i+1),name,joinMonth:0,active:true})),
+  months:Array.from({length:10},(_,i)=>makeMonth(i,start)),selectedMonth:0};
+}
+let d=fresh(),m=0;
+function normalizeData(x){
+ if(!x||!Array.isArray(x.members)||!Array.isArray(x.months)||!x.months.length)return false;
+ d=x;
+ d.contribution=Number(d.contribution)||3000;
+ d.startDate=d.startDate||d.months[0].date||'2026-03-10';
+ d.members.forEach(mem=>{
+  mem.joinMonth=Math.max(0,Number(mem.joinMonth)||0);
+  if(!Array.isArray(mem.statusHistory) && mem.active===false) mem.statusHistory=[{from:mem.joinMonth,active:false}];
+ });
+ d.months.forEach((mo,i)=>{
+  mo.payments=mo.payments||{};
+  // Older versions stored old-balance recoveries separately. They are still real
+  // money received, so merge them into that month's total member payments.
+  Object.entries(mo.recoveries||{}).forEach(([id,val])=>{
+   mo.payments[id]=(Number(mo.payments[id])||0)+(Number(val)||0);
+  });
+  mo.recoveries={};
+  mo.date=mo.date||addMonths(d.startDate,i);
+  mo.label=mo.label||'Month '+(i+1);
+  mo.contribution=Number(mo.contribution)||d.contribution;
+  mo.payoutGiven=!!mo.payoutGiven;
+  mo.recipientId=mo.recipientId||'';
+ });
+ m=Math.max(0,Math.min(d.months.length-1,Number(d.selectedMonth)||0));
+ return true;
+}
+function load(){
+ try{let x=JSON.parse(localStorage.getItem(KEY));if(normalizeData(x))return;}catch(e){}
+ try{
+  let old=JSON.parse(localStorage.getItem(OLDKEY));
+  if(old){
+   d=fresh();
+   let names=Array.isArray(old.names)?old.names:d.members.map(x=>x.name);
+   d.members=names.map((name,i)=>({id:'mem'+(i+1),name:String(name),joinMonth:0,active:true}));
+   d.months.forEach((mo,mi)=>{
+    d.members.forEach((mem,idx)=>{mo.payments[mem.id]=(Number(old.payments?.[mi]?.[idx])||0)+(Number(old.arrearsPaid?.[mi]?.[idx])||0);});
+    let rec=old.order?.[mi];mo.recipientId=d.members[Number.isInteger(rec)?rec:mi]?.id||'';
+    mo.payoutGiven=!!old.payouts?.[mi]?.given;mo.payoutDate=old.payouts?.[mi]?.date||'';
+   });
+   m=Math.max(0,Math.min(d.months.length-1,Number(localStorage.getItem(OLDKEY+'_selectedMonth'))||0));
+   save();
+  }
+ }catch(e){}
+}
+function save(){
+ d.selectedMonth=m;
+ try{localStorage.setItem(KEY,JSON.stringify(d));$('status').textContent='✓ Automatically saved in this browser.';}
+ catch(e){$('status').textContent='Storage error: browser storage available nahi. Full backup download karein.';}
+}
+function activeAt(mem,mi){
+ let state=mi>=Number(mem.joinMonth||0);
+ (mem.statusHistory||[]).slice().sort((a,b)=>a.from-b.from).forEach(ev=>{if(Number(ev.from)<=mi)state=!!ev.active;});
+ if(!Array.isArray(mem.statusHistory) && mem.active===false)state=false;
+ return state;
+}
+function activeMembers(mi=m){return d.members.filter(mem=>mi>=Number(mem.joinMonth||0)&&activeAt(mem,mi));}
+function monthContribution(mi){return Number(d.months[mi]?.contribution)||Number(d.contribution)||3000;}
+function arrearsBeforeJoin(join){let total=0;for(let i=0;i<join;i++)total+=monthContribution(i);return total;}
+function dueFor(mem,mi){
+ if(mi<Number(mem.joinMonth||0)||!activeAt(mem,mi))return 0;
+ return monthContribution(mi)+(mi===Number(mem.joinMonth||0)?arrearsBeforeJoin(mi):0);
+}
+function paidFor(mem,mi){return Number(d.months[mi]?.payments?.[mem.id])||0;}
+function dueToDate(mem,mi){let sum=0;for(let i=0;i<=mi;i++)sum+=dueFor(mem,i);return sum;}
+function paidToDate(mem,mi){let sum=0;for(let i=0;i<=mi;i++)sum+=paidFor(mem,i);return sum;}
+function previousBalance(mem,mi){let sum=0;for(let i=0;i<mi;i++)sum+=dueFor(mem,i)-paidFor(mem,i);return Math.max(0,sum);}
+function remainingBalance(mem,mi){return Math.max(0,dueToDate(mem,mi)-paidToDate(mem,mi));}
+function target(mi){return activeMembers(mi).length*monthContribution(mi);}
+function collect(mi){return d.members.reduce((sum,mem)=>sum+paidFor(mem,mi),0);}
+function totalReceivedToDate(mi){let sum=0;for(let i=0;i<=mi;i++)sum+=collect(i);return sum;}
+function labelMonth(i){return d.months[i]?.label||'Month '+(i+1);}
+function payoutAmount(mi){return Number(d.months[mi]?.payoutAmount ?? target(mi));}
+function render(){
+ $('adminLabel').textContent=d.adminName||'Aamir Shahzad';
+ $('adminName').value=d.adminName||'Aamir Shahzad';
+ $('committeeName').value=d.committeeName||'My Committee';
+ $('contribution').value=d.contribution;
+ $('duration').value=d.months.length;
+ $('startDate').value=d.startDate;
+ $('memberCount').textContent=activeMembers(m).length;
+ $('monthCount').textContent=d.months.length;
+ $('target').textContent=money(target(m));
+ $('received').textContent=money(collect(m));
+ $('month').innerHTML=d.months.map((x,i)=>`<option value="${i}">${esc(x.label)} — ${esc(x.date)}</option>`).join('');
+ $('month').value=m;
+ $('joinMonth').innerHTML=d.months.map((x,i)=>`<option value="${i}">${esc(x.label)}</option>`).join('');
+ $('joinMonth').value=String(m);
+ $('monthInfo').textContent=`${labelMonth(m)} · Monthly target: ${money(target(m))} (${activeMembers(m).length} members × ${money(monthContribution(m))}) · Total received this month: ${money(collect(m))} · Pending: ${money(Math.max(0,target(m)-collect(m)))}`;
+ $('memberList').innerHTML=d.members.map(mem=>{
+  let isActive=activeAt(mem,m),join=Number(mem.joinMonth||0);
+  return `<div class="member"><div class="membername"><input data-member-name="${esc(mem.id)}" value="${esc(mem.name)}" aria-label="Member name"><small class="muted">Joined: ${esc(labelMonth(join))} · Joining arrears: ${money(arrearsBeforeJoin(join))}</small></div><div><span class="tag ${isActive?'':'warn'}">${isActive?'Active':'Inactive'}</span></div><div class="muted">Paid to date: <b>${money(paidToDate(mem,m))}</b><br>Remaining: <b>${money(remainingBalance(mem,m))}</b></div><button class="${isActive?'red':'green'}" onclick="toggleMember('${esc(mem.id)}')">${isActive?'Set inactive':'Activate'}</button><button class="red" onclick="deleteMember('${esc(mem.id)}')">Delete permanently</button></div>`;
+ }).join('');
+ $('payments').innerHTML=d.members.filter(mem=>activeAt(mem,m)&&m>=Number(mem.joinMonth||0)).map(mem=>{
+  let prev=previousBalance(mem,m),due=dueFor(mem,m),paid=paidFor(mem,m),max=prev+due;
+  return `<div class="member"><div class="membername"><b>${esc(mem.name)}</b><div class="muted">Previous balance: ${money(prev)} · This month due: ${money(due)} · Total payable: ${money(max)}</div></div><div><label class="muted">Total payment received this month</label><input type="number" min="0" max="${max}" step="1" data-paid="${esc(mem.id)}" value="${paid}"></div><span class="tag ${remainingBalance(mem,m)===0?'':'warn'}">${remainingBalance(mem,m)===0?'Clear':'Balance '+money(remainingBalance(mem,m))}</span></div>`;
+ }).join('')||'<p class="muted">Is month mein koi active member nahi.</p>';
+ $('balances').innerHTML=d.members.map(mem=>{
+  let prev=previousBalance(mem,m),due=dueFor(mem,m),paid=paidFor(mem,m),totalPaid=paidToDate(mem,m),bal=remainingBalance(mem,m);
+  return `<tr><td>${esc(mem.name)}${activeAt(mem,m)?'':' (Inactive / Not yet joined)'}</td><td>${money(prev)}</td><td>${money(due)}</td><td>${money(paid)}</td><td>${money(totalPaid)}</td><td>${money(bal)}</td></tr>`;
+ }).join('');
+ let eligible=activeMembers(m);
+ if(!d.months[m].recipientId||!d.members.some(mem=>mem.id===d.months[m].recipientId)){
+  d.months[m].recipientId=eligible[0]?.id||'';
+ }
+ $('recipient').innerHTML=eligible.map(mem=>`<option value="${esc(mem.id)}">${esc(mem.name)}</option>`).join('');
+ $('recipient').value=d.months[m].recipientId;
+ $('payoutDate').value=d.months[m].payoutDate||'';
+ $('payoutAmount').value=d.months[m].payoutAmount??target(m);
+ $('payoutGiven').checked=!!d.months[m].payoutGiven;
+ $('payoutMsg').textContent=d.months[m].payoutGiven
+  ? `GIVEN: ${d.members.find(mem=>mem.id===d.months[m].recipientId)?.name||'Member'} ko ${money(payoutAmount(m))} de diye gaye.`
+  : `PENDING: ${money(payoutAmount(m))} abhi recipient ko dene hain.`;
+ $('history').innerHTML=d.months.map((mo,i)=>{
+  let t=target(i),c=collect(i),rec=d.members.find(mem=>mem.id===mo.recipientId)?.name||'Not selected';
+  let status=mo.payoutGiven?'GIVEN':'PENDING';
+  return `<tr><td>${esc(mo.label)}<br><small>${esc(mo.date)}</small></td><td>${activeMembers(i).length}</td><td>${money(t)}</td><td>${money(c)}</td><td>${money(Math.max(0,t-c))}</td><td>${esc(rec)}</td><td><span class="tag ${mo.payoutGiven?'':'warn'}">${status}</span></td><td>${money(payoutAmount(i))}</td></tr>`;
+ }).join('');
+ save();
+}
+function saveSettings(){
+ let contribution=Number($('contribution').value),duration=Number($('duration').value),date=$('startDate').value;
+ if(!Number.isInteger(contribution)||contribution<1||!Number.isInteger(duration)||duration<1||duration>600||!date){alert('Contribution, months aur start date valid enter karein.');return;}
+ let oldLen=d.months.length;
+ d.contribution=contribution;d.startDate=date;
+ d.committeeName=$('committeeName').value.trim()||'My Committee';
+ d.adminName=$('adminName').value.trim()||'Aamir Shahzad';
+ for(let i=0;i<d.months.length;i++)d.months[i].contribution=contribution;
+ if(duration>oldLen){for(let i=oldLen;i<duration;i++)d.months.push(makeMonth(i,date,contribution));}
+ else if(duration<oldLen){
+  if(d.members.some(mem=>Number(mem.joinMonth||0)>=duration)){alert('Kuch members ki joining selected duration ke baad hai. Pehle joining adjust ya member delete karein.');return;}
+  if(d.months.slice(duration).some(mo=>Object.values(mo.payments||{}).some(v=>Number(v)>0)||mo.payoutGiven)){
+   if(!confirm('Aakhri months mein payment/payout saved hai. Kya un months ko remove karna hai? Pehle backup lein.'))return;
+  }
+  d.months=d.months.slice(0,duration);m=Math.min(m,duration-1);
+ }
+ d.months.forEach((mo,i)=>{mo.date=addMonths(date,i);mo.contribution=contribution;if(!mo.label||/^Month \d+$/.test(mo.label))mo.label='Month '+(i+1);});
+ save();render();
+}
+function addMonth(){
+ let i=d.months.length;d.months.push(makeMonth(i,d.startDate,d.contribution));
+ $('duration').value=d.months.length;m=i;save();render();
+}
+function addMember(){
+ let name=$('newMember').value.trim();if(!name){alert('Member ka naam enter karein.');return;}
+ let join=Math.max(0,Math.min(Number($('joinMonth').value)||0,d.months.length-1));
+ let arrears=arrearsBeforeJoin(join),current=monthContribution(join),upfront=0;
+ if(arrears>0){
+  let answer=prompt(`${name} ko ${labelMonth(join)} mein add karne ke liye pichlay ${join} months ki full arrears ${money(arrears)} receive karna zaroori hai.\n\nAbhi receive hui total amount enter karein. Is mein arrears poori honi chahiye. Joining month ki ${money(current)} contribution bhi due rahegi agar extra pay nahi hui.`);
+  if(answer===null)return;
+  upfront=Number(String(answer).replace(/,/g,'').trim());
+  if(!Number.isFinite(upfront)||upfront<arrears||!Number.isInteger(upfront)||upfront>arrears+current){
+   alert(`Member add nahi hua. Amount ${money(arrears)} se ${money(arrears+current)} ke darmiyan honi chahiye. Sirf ${money(arrears)} receive hui ho to ${money(arrears)} enter karein.`);
+   return;
+  }
+ }
+ let id='mem'+Date.now()+'_'+Math.random().toString(36).slice(2,7);
+ d.members.push({id,name,joinMonth:join,active:true,statusHistory:[{from:join,active:true}]});
+ if(upfront>0)d.months[join].payments[id]=upfront;
+ $('newMember').value='';save();render();
+ alert(`${name} add ho gaya. Pichlay months ki arrears: ${money(arrears)}. Joining month due: ${money(current)}. Received: ${money(upfront)}. Remaining balance: ${money(Math.max(0,arrears+current-upfront))}.`);
+}
+function toggleMember(id){
+ let mem=d.members.find(x=>x.id===id);if(!mem)return;
+ let next=!activeAt(mem,m);
+ mem.statusHistory=mem.statusHistory||[];
+ mem.statusHistory=mem.statusHistory.filter(ev=>Number(ev.from)!==m);
+ mem.statusHistory.push({from:m,active:next});
+ mem.active=next;save();render();
+}
+function deleteMember(id){
+ let mem=d.members.find(x=>x.id===id);if(!mem)return;
+ let hasRecords=d.months.some(mo=>Number(mo.payments?.[id]||0)>0);
+ if(!confirm(`${mem.name} ko permanently delete karna hai? Is member ki tamam payment history bhi delete hogi aur har month ka target dobara calculate hoga. Pehle backup lein.`))return;
+ d.members=d.members.filter(x=>x.id!==id);
+ d.months.forEach(mo=>{delete mo.payments?.[id];if(mo.recipientId===id){mo.recipientId='';mo.payoutGiven=false;}});
+ save();render();
+}
+$('memberList').addEventListener('change',e=>{
+ let id=e.target.dataset.memberName;if(!id)return;
+ let mem=d.members.find(x=>x.id===id);if(mem){mem.name=e.target.value.trim()||mem.name;save();render();}
+});
+$('month').addEventListener('change',e=>{m=Number(e.target.value);save();render();});
+$('payments').addEventListener('change',e=>{
+ let el=e.target,id=el.dataset.paid;if(!id)return;
+ let mem=d.members.find(x=>x.id===id);if(!mem)return;
+ let amount=Number(el.value),max=previousBalance(mem,m)+dueFor(mem,m);
+ if(!Number.isInteger(amount)||amount<0||amount>max){alert(`Payment 0 se ${money(max)} ke darmiyan enter karein.`);render();return;}
+ d.months[m].payments[id]=amount;save();render();
+});
+function savePayments(){save();$('payMessage').textContent='Payments successfully saved.';render();}
+function nextMonth(){if(m<d.months.length-1){m++;save();render();}else alert('Ye last configured month hai. Settings mein total months increase karein.');}
+function savePayout(){
+ let mo=d.months[m],amount=Number($('payoutAmount').value),recipient=$('recipient').value;
+ if(!recipient){alert('Pehle committee recipient select karein.');return;}
+ if(!Number.isInteger(amount)||amount<0){alert('Payout amount valid enter karein.');return;}
+ mo.recipientId=recipient;mo.payoutDate=$('payoutDate').value;mo.payoutAmount=amount;mo.payoutGiven=$('payoutGiven').checked;
+ save();render();
+ $('payoutMsg').textContent=mo.payoutGiven?`GIVEN: ${money(amount)} recipient ko de diye gaye.`:`PENDING: ${money(amount)} abhi dene hain.`;
+}
+function csvCell(v){let s=String(v??'');return '"'+s.replace(/"/g,'""')+'"';}
+function exportCSV(){
+ let rows=[['Member Name','Month','Pending Payment','Total IN','Total OUT']];
+ d.members.forEach(mem=>{
+  d.months.forEach((mo,i)=>{
+   let due=dueFor(mem,i),paid=paidFor(mem,i),pending=remainingBalance(mem,i);
+   let out=mo.payoutGiven&&mo.recipientId===mem.id?payoutAmount(i):0;
+   let active=activeAt(mem,i),has=active||due||paid||pending||out;
+   if(has)rows.push([mem.name,mo.label,pending,paidToDate(mem,i),out]);
+  });
+ });
+ let csv='\uFEFF'+rows.map(r=>r.map(csvCell).join(',')).join('\r\n');
+ let blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}),url=URL.createObjectURL(blob),a=document.createElement('a');
+ a.href=url;a.download=(d.committeeName||'Committee').replace(/[^a-z0-9-_]/gi,'_')+'_report.csv';
+ document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);
+ $('exportMsg').textContent='CSV download ho gayi. Is mein Member Name, Month, Pending Payment, Total IN aur Total OUT hain.';
+}
+function clearAfterExport(){
+ if(!$('exportConfirmed').checked){alert('Pehle exported file save aur check karne ki confirmation tick karein.');return;}
+ if(!confirm('Kya aap sure hain? Current committee ka tamam website record permanently clear hoga. Pehle CSV aur JSON backup rakh lein.'))return;
+ let admin=d.adminName;try{localStorage.removeItem(KEY);localStorage.removeItem(OLDKEY);localStorage.removeItem(OLDKEY+'_selectedMonth');}catch(e){}
+ d=fresh();d.adminName=admin;d.committeeName='New Committee';m=0;save();$('exportConfirmed').checked=false;
+ $('exportMsg').textContent='Purana committee record clear kar diya gaya. New Committee ready hai.';render();
+}
+function backup(){
+ let blob=new Blob([JSON.stringify(d,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');
+ a.href=url;a.download='Committee_Full_Backup.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);
+}
+function restore(e){
+ let f=e.target.files[0];if(!f)return;
+ let r=new FileReader();r.onload=()=>{
+  try{let x=JSON.parse(r.result);if(!normalizeData(x))throw Error('Invalid backup');save();render();alert('Backup restored successfully.');}
+  catch(err){alert('Backup file valid nahi hai.');}
+ };
+ r.readAsText(f);e.target.value='';
+}
+load();render();
+try{localStorage.setItem(KEY+'_test','1');localStorage.removeItem(KEY+'_test');}
+catch(e){$('status').textContent='Warning: browser local storage blocked. Backup regularly.';}
+</script></body></html>
