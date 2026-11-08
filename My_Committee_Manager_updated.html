@@ -1,0 +1,501 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>My Committee Manager</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;padding:16px;background:#f1f5f9;color:#172033;font-family:Arial,sans-serif}
+main{max-width:1050px;margin:auto}
+h1{color:#166534}h2{font-size:19px}
+.card{background:white;padding:17px;border-radius:13px;margin:13px 0;box-shadow:0 2px 8px #0001}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+.stat{background:#f0fdf4;padding:13px;border-radius:10px;min-width:0}
+.stat small{color:#64748b}.stat b{display:block;font-size:19px;margin-top:7px;overflow-wrap:anywhere}
+input,select,button{font:inherit;padding:10px;border:1px solid #cbd5e1;border-radius:8px;max-width:100%}
+input,select{width:100%}button{cursor:pointer;font-weight:bold;background:#e2e8f0}
+button:disabled{opacity:.4;cursor:not-allowed}
+.green{background:#15803d;color:white;border:0}
+.blue{background:#2563eb;color:white;border:0}
+.red{background:#fee2e2;color:#991b1b}
+.muted{font-size:12px;color:#64748b}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.row{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+.row>*{flex:1}
+.member{display:grid;grid-template-columns:minmax(130px,1.5fr) minmax(90px,1fr) minmax(90px,1fr) auto;gap:8px;align-items:center;padding:12px 0;border-bottom:1px solid #e2e8f0}
+.tag{font-size:11px;padding:5px 8px;border-radius:20px;background:#dcfce7;color:#166534;white-space:nowrap}
+.warn{background:#fee2e2;color:#991b1b}
+.good{color:#15803d}
+table{border-collapse:collapse;width:100%;font-size:13px;min-width:600px}
+td,th{padding:9px 6px;border-bottom:1px solid #e2e8f0;text-align:left}
+th{background:#f8fafc}
+.tablewrap{overflow-x:auto}
+.note{background:#eff6ff;padding:12px;border-radius:9px;color:#1e40af;font-size:13px}
+@media(max-width:650px){
+ body{padding:9px}.stats{grid-template-columns:repeat(2,1fr)}
+ .member{grid-template-columns:1fr 1fr}
+ .member .membername{grid-column:1/-1}
+ .card{padding:12px}.stat b{font-size:16px}
+}
+</style>
+</head>
+<body>
+<main>
+<h1>💰 My Committee Manager</h1>
+<p class="muted">March 10 – December 10, 2026 · 10 Members · PKR</p>
+
+<div class="stats">
+ <div class="stat"><small>Committee Duration</small><b>10 Months</b></div>
+ <div class="stat"><small>Monthly Target</small><b>Rs. 30,000</b></div>
+ <div class="stat"><small>This Month Received</small><b id="received">0</b></div>
+ <div class="stat"><small>This Month Shortfall</small><b id="shortfall">30,000</b></div>
+</div>
+
+<div class="card">
+<h2>📅 Select Committee Month</h2>
+<label class="muted">Current month</label>
+<select id="month"></select>
+<p id="monthDates" class="muted"></p>
+<div class="grid">
+ <div><small class="muted">Monthly due date</small><b>10th</b></div>
+ <div><small class="muted">Contribution per member</small><b>Rs. 3,000</b></div>
+</div>
+</div>
+
+<div class="card">
+<h2>👥 Members & Monthly Payments</h2>
+<div class="note">
+Har member ke liye sirf 2 amounts enter karein:
+<br>1. <b>This Month:</b> Is mahine ke Rs. 3,000 mein se kitne mile?
+<br>2. <b>Old Balance Recovery:</b> Pichle mahino ka baqaya kitna receive hua?
+<br>Purana baqaya khud calculate hoga.
+</div>
+<div id="members"></div>
+<div class="row" style="margin-top:14px">
+ <button class="green" onclick="savePayments()">💾 Save Payments</button>
+ <button class="blue" onclick="finalizeMonth()">✓ Finalize & Next Month →</button>
+</div>
+<p id="paymessage" class="muted"></p>
+</div>
+
+<div class="card">
+<h2>📊 Member Wise Account</h2>
+<p class="muted">Selected month ke end tak har member ka complete account.</p>
+<div class="tablewrap">
+<table>
+<thead>
+<tr>
+<th>Member</th>
+<th>Old Balance</th>
+<th>This Month Paid</th>
+<th>Old Recovery</th>
+<th>Current Status</th>
+<th>Total Remaining</th>
+</tr>
+</thead>
+<tbody id="balances"></tbody>
+</table>
+</div>
+</div>
+
+<div class="card">
+<h2>🏆 Committee Order & Payout</h2>
+<p class="muted">Up/down arrows se kisi bhi member ki baari change karein.</p>
+<div id="order"></div>
+<hr style="border:0;border-top:1px solid #e2e8f0;margin:15px 0">
+<b id="recipient"></b>
+<p class="muted">Rs. 30,000 payout record</p>
+<label class="muted">Payout date<input type="date" id="payoutDate"></label>
+<p><label><input type="checkbox" id="payoutGiven" style="width:auto"> Committee ke Rs. 30,000 de diye</label></p>
+<button class="green" onclick="savePayout()">Save Payout</button>
+<p id="payoutMsg" class="muted"></p>
+</div>
+
+<div class="card">
+<h2>📚 Committee History</h2>
+<div class="tablewrap">
+<table>
+<thead>
+<tr>
+<th>Month</th><th>Current Collection</th><th>Old Recovery</th>
+<th>Total Received</th><th>Collection Status</th><th>Member Balances Due</th><th>Committee Given To</th><th>Payout</th>
+</tr>
+</thead>
+<tbody id="history"></tbody>
+</table>
+</div>
+</div>
+
+<div class="card">
+<h2>💾 Backup & Restore</h2>
+<p class="muted">Regularly download backup. Is file se doosre device par bhi record restore kar sakte hain.</p>
+<button class="green" onclick="backup()">Download Backup</button>
+<button onclick="document.getElementById('file').click()">Restore Backup</button>
+<input type="file" id="file" accept=".json" hidden onchange="restore(event)">
+<button class="red" onclick="resetAll()">Reset All Records</button>
+<p id="message" class="muted">Auto-save is ON. Data stays in this browser on this device. Download backups regularly; clearing browser data or switching browser/device can remove or hide this local record.</p>
+</div>
+</main>
+
+<script>
+const KEY='myCommittee_v4';
+const DEFAULT_NAMES=['Aamir','Ahsan','Shoukat','Javaid','Gulzar','Naveed','Ijaz','Sanwal','Adnan','Haseeb'];
+
+const fresh=()=>({
+ memberNamesVersion:1,
+ names:DEFAULT_NAMES.slice(),
+ order:Array.from({length:10},(_,i)=>i),
+ payments:Array.from({length:10},()=>Array(10).fill(0)),
+ arrearsPaid:Array.from({length:10},()=>Array(10).fill(0)),
+ payouts:Array.from({length:10},()=>({given:false,date:''}))
+});
+
+let d=fresh(),m=0;
+
+function normalize(x){
+ let n=fresh();
+
+ if(Array.isArray(x.names)&&x.names.length===10)
+ n.names=x.names.map((v,i)=>String(v||DEFAULT_NAMES[i]));
+ n.memberNamesVersion=Number(x.memberNamesVersion)||0;
+
+ if(Array.isArray(x.order)&&x.order.length===10&&
+ new Set(x.order).size===10&&
+ x.order.every(v=>Number.isInteger(v)&&v>=0&&v<10))
+ n.order=x.order;
+
+ n.payments=Array.from({length:10},(_,i)=>
+ Array.from({length:10},(_,j)=>
+ Math.max(0,Math.min(3000,Number(x.payments?.[i]?.[j])||0))
+ ));
+
+ n.arrearsPaid=Array.from({length:10},(_,i)=>
+ Array.from({length:10},(_,j)=>
+ Math.max(0,Number(x.arrearsPaid?.[i]?.[j])||0)
+ ));
+
+ n.payouts=Array.from({length:10},(_,i)=>
+ x.payouts?.[i]||{given:false,date:''}
+ );
+
+ return n;
+}
+
+// Load new data or migrate names/order from previous version
+try{
+ let current=JSON.parse(localStorage.getItem(KEY));
+ if(current){
+  d=normalize(current);
+ }else{
+  let previous=JSON.parse(localStorage.getItem('myCommittee_v3'));
+  if(previous){
+   d=normalize(previous);
+   // Existing monthly entries up to Rs. 3,000 are retained.
+   // Old larger cumulative entries remain in the old v3 data.
+   for(let i=0;i<10;i++){
+    for(let j=0;j<10;j++){
+     let old=Number(previous.payments?.[i]?.[j])||0;
+     d.payments[i][j]=Math.min(3000,Math.max(0,old));
+    }
+   }
+  }else{
+   let older=JSON.parse(localStorage.getItem('myCommittee_v2'));
+   if(older){
+    d=normalize(older);
+    d.payments=Array.from({length:10},(_,i)=>
+    Array.from({length:10},(_,j)=>older.payments?.[i]?.[j]===true?3000:0));
+   }
+  }
+ }
+}catch(e){}
+
+// Update the old placeholder/custom member labels once, without changing them on later visits.
+let namesNeedMigration = d.memberNamesVersion !== 1;
+if(namesNeedMigration){ d.names=DEFAULT_NAMES.slice(); d.memberNamesVersion=1; }
+
+const today = new Date();
+const defaultMonth = today.getFullYear()===2026 ? Math.min(9,Math.max(0,today.getMonth()-2)) : 0;
+try {
+  const savedMonth = localStorage.getItem(KEY+'_selectedMonth');
+  m = savedMonth===null ? defaultMonth : Math.max(0,Math.min(9,Number(savedMonth)||0));
+} catch(e) { m=defaultMonth; }
+
+const $=id=>document.getElementById(id);
+const names=['March','April','May','June','July','August','September','October','November','December'];
+const money=n=>'Rs. '+Number(n).toLocaleString('en-PK');
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const save=()=>{
+ try{
+  localStorage.setItem(KEY,JSON.stringify(d));
+  localStorage.setItem(KEY+'_selectedMonth',String(m));
+  $('message').textContent='✓ Records saved automatically on this browser.';
+ }catch(e){
+  $('message').textContent='Storage error. Download a backup.';
+ }
+};
+if(namesNeedMigration) save();
+
+function currentPaid(month,i){
+ return Number(d.payments[month][i])||0;
+}
+function oldRecovered(month,i){
+ return Number(d.arrearsPaid[month][i])||0;
+}
+function oldBalance(i,month){
+ let due=month*3000;
+ let paid=0;
+ for(let k=0;k<month;k++){
+  paid+=currentPaid(k,i)+oldRecovered(k,i);
+ }
+ return Math.max(0,due-paid);
+}
+function remaining(i,month){
+ return Math.max(0,oldBalance(i,month)-oldRecovered(month,i))
+ + Math.max(0,3000-currentPaid(month,i));
+}
+function currentCollection(month){
+ return d.payments[month].reduce((a,b)=>a+b,0);
+}
+function recoveryCollection(month){
+ return d.arrearsPaid[month].reduce((a,b)=>a+b,0);
+}
+function totalCollection(month){
+ return currentCollection(month)+recoveryCollection(month);
+}
+function escName(i){return esc(d.names[i])}
+
+function render(){
+ $('month').innerHTML=names.map((n,i)=>
+ `<option value="${i}">Month ${i+1} — ${n} 2026</option>`
+ ).join('');
+ $('month').value=m;
+
+ $('monthDates').textContent=
+ 'Due date: 10 '+names[m]+' 2026 · Month '+(m+1)+' of 10';
+
+ $('received').textContent=money(totalCollection(m));
+ $('shortfall').textContent=money(Math.max(0,30000-totalCollection(m)));
+
+ $('members').innerHTML=d.names.map((n,i)=>{
+  let old=oldBalance(i,m);
+  let cp=currentPaid(m,i);
+  let rp=oldRecovered(m,i);
+  return `
+  <div class="member">
+   <div class="membername">
+    <input data-name="${i}" value="${esc(n)}" maxlength="60" aria-label="Member name">
+    <div class="muted">Previous balance: ${money(old)}</div>
+   </div>
+   <div>
+    <label class="muted">This Month</label>
+    <input type="number" min="0" max="3000" step="1"
+     data-current="${i}" value="${cp}" aria-label="Current month payment">
+   </div>
+   <div>
+    <label class="muted">Old Recovery</label>
+    <input type="number" min="0" max="${old}" step="1"
+     data-recovery="${i}" value="${rp}" aria-label="Old balance recovery">
+   </div>
+   <span class="tag ${cp>=3000?'':'warn'}">
+    ${cp>=3000?'✓ Paid':cp>0?'Partial':'Unpaid'}
+   </span>
+  </div>`;
+ }).join('');
+
+ $('balances').innerHTML=d.names.map((n,i)=>{
+  let old=oldBalance(i,m);
+  let cp=currentPaid(m,i);
+  let rp=oldRecovered(m,i);
+  let rem=remaining(i,m);
+  let status=cp>=3000?'✓ Current Paid':cp>0?'Partial':'Unpaid';
+  return `<tr>
+   <td>${esc(n)}</td>
+   <td>${money(old)}</td>
+   <td>${money(cp)}</td>
+   <td>${money(rp)}</td>
+   <td style="color:${cp>=3000?'#15803d':'#b91c1c'}">${status}</td>
+   <td style="color:${rem>0?'#b91c1c':'#15803d'}">${rem>0?money(rem):'✓ Clear'}</td>
+  </tr>`;
+ }).join('');
+
+ $('order').innerHTML=d.order.map((id,pos)=>`
+ <div class="member">
+  <div><b>${pos+1}. ${escName(id)}</b>
+   <div class="muted">Month ${pos+1} · ${names[pos]}</div>
+  </div>
+  <button onclick="move(${pos},-1)" ${pos===0?'disabled':''}>↑</button>
+  <button onclick="move(${pos},1)" ${pos===9?'disabled':''}>↓</button>
+ </div>`).join('');
+
+ let recipient=d.order[m];
+ $('recipient').textContent='Month '+(m+1)+' recipient: '+d.names[recipient];
+ $('payoutDate').value=d.payouts[m].date||'';
+ $('payoutGiven').checked=d.payouts[m].given;
+ $('payoutMsg').textContent=d.payouts[m].given?
+ '✓ Payout recorded.':'Payout not yet recorded.';
+
+ $('history').innerHTML=names.map((n,i)=>{
+  let col=currentCollection(i);
+  let rec=recoveryCollection(i);
+  let rem=d.names.reduce((a,_,j)=>a+remaining(j,i),0);
+  let who=d.order[i];
+  let p=d.payouts[i];
+  return `<tr>
+   <td>${n}</td>
+   <td>${money(col)}</td>
+   <td>${money(rec)}</td>
+   <td>${money(col+rec)}</td>
+   <td style="color:${col+rec>=30000?'#15803d':'#b91c1c'}">${col+rec>=30000?'✓ Monthly target complete':'Pending · '+money(Math.max(0,30000-col-rec))+' short'}</td>
+   <td>${money(rem)}</td>
+   <td>${escName(who)}</td>
+   <td>${p.given?'✓ Given':'Pending'}</td>
+  </tr>`;
+ }).join('');
+}
+
+function readPayments(){
+ let currentFields=$('members').querySelectorAll('[data-current]');
+ let recoveryFields=$('members').querySelectorAll('[data-recovery]');
+ let newCurrent=[],newRecovery=[];
+
+ for(let el of currentFields){
+  let v=Number(el.value);
+  if(!Number.isInteger(v)||v<0||v>3000){
+   alert('This Month payment Rs. 0 se Rs. 3,000 ke darmiyan honi chahiye.');
+   el.focus();return false;
+  }
+  newCurrent[Number(el.dataset.current)]=v;
+ }
+
+ for(let el of recoveryFields){
+  let i=Number(el.dataset.recovery);
+  let v=Number(el.value);
+  let max=oldBalance(i,m);
+  if(!Number.isInteger(v)||v<0||v>max){
+   alert(d.names[i]+' ka old balance recovery '+money(max)+' se zyada nahi ho sakta.');
+   el.focus();return false;
+  }
+  newRecovery[i]=v;
+ }
+
+ d.payments[m]=newCurrent;
+ d.arrearsPaid[m]=newRecovery;
+ return true;
+}
+
+function savePayments(){
+ if(!readPayments())return;
+ save();
+ $('paymessage').textContent='✓ Payments saved. Current month aur old balance update ho gaye.';
+ render();
+ $('paymessage').textContent='✓ Payments saved. Current month aur old balance update ho gaye.';
+}
+
+function finalizeMonth(){
+ if(!readPayments())return;
+ save();
+
+ if(m>=9){
+  render();
+  alert('Congratulations! Aapke 10 committee months complete ho gaye.');
+  return;
+ }
+
+ if(!confirm(names[m]+' ka record save ho gaya. Kya '+names[m+1]+' ka month open karna hai?'))return;
+
+ m++;
+ render();
+ $('paymessage').textContent='✓ '+names[m]+' open ho gaya. Naye month ki payments 0 se shuru hain. Purana balance automatically carry forward hai.';
+ window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function move(pos,dir){
+ let t=pos+dir;
+ if(t<0||t>9)return;
+ [d.order[pos],d.order[t]]=[d.order[t],d.order[pos]];
+ save();render();
+}
+
+$('month').addEventListener('change',e=>{
+ m=Number(e.target.value);
+ save();
+ render();
+});
+
+// Save valid payment amounts immediately as the user types.
+$('members').addEventListener('input',e=>{
+ const el=e.target;
+ if(el.dataset.current!==undefined){
+  const i=Number(el.dataset.current), v=Number(el.value);
+  if(Number.isInteger(v)&&v>=0&&v<=3000){ d.payments[m][i]=v; save(); }
+ }
+ if(el.dataset.recovery!==undefined){
+  const i=Number(el.dataset.recovery), v=Number(el.value);
+  if(Number.isInteger(v)&&v>=0&&v<=oldBalance(i,m)){ d.arrearsPaid[m][i]=v; save(); }
+ }
+});
+
+$('members').addEventListener('change',e=>{
+ if(e.target.dataset.name!==undefined){
+  let i=Number(e.target.dataset.name);
+  d.names[i]=e.target.value.trim()||DEFAULT_NAMES[i];
+  save();render();
+ } else if(e.target.dataset.current!==undefined || e.target.dataset.recovery!==undefined){
+  render();
+ }
+});
+
+function savePayout(){
+ let given=$('payoutGiven').checked;
+ let date=$('payoutDate').value;
+ if(given&&!date){
+  alert('Payout date enter karein.');return;
+ }
+ if(given&&totalCollection(m)<30000){
+  if(!confirm('Collection Rs. 30,000 se kam hai. Kya phir bhi payout given mark karna hai?'))return;
+ }
+ d.payouts[m]={given,date};
+ save();render();
+}
+
+function backup(){
+ let a=document.createElement('a');
+ let u=URL.createObjectURL(new Blob([JSON.stringify(d,null,2)],{type:'application/json'}));
+ a.href=u;a.download='MyCommitteeBackup.json';a.click();
+ URL.revokeObjectURL(u);
+}
+
+function restore(e){
+ let f=e.target.files[0];
+ if(!f)return;
+ let reader=new FileReader();
+ reader.onload=()=>{
+  try{
+   let x=JSON.parse(reader.result);
+   if(!Array.isArray(x.names)||x.names.length!==10||
+      !Array.isArray(x.payments)||x.payments.length!==10)throw Error();
+   d=normalize(x);m=0;save();render();
+   alert('Backup restored successfully.');
+  }catch(err){alert('Invalid backup file.')}
+ };
+ reader.readAsText(f);e.target.value='';
+}
+
+function resetAll(){
+ if(confirm('Are you sure? All records will be deleted. Download backup first!')){
+  d=fresh();m=0;save();render();
+ }
+}
+
+render();
+try {
+  localStorage.setItem(KEY+'_storage_test','ok');
+  localStorage.removeItem(KEY+'_storage_test');
+} catch(e) {
+  $('message').textContent='Warning: this browser is blocking local storage. Records may not persist; use Download Backup.';
+}
+</script>
+</body>
+</html>
